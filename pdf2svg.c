@@ -87,7 +87,8 @@ int main(int argn, char *args[])
 	PopplerPage *page;
 
 	// Initialise the GType library
-	g_type_init ();
+	// 2018/05/24 pdf2svg.c:90:2: warning: 'g_type_init' is deprecated [-Wdeprecated-declarations]
+	// g_type_init ();
 
 	// Get command line arguments
 	if ((argn < 3)||(argn > 4)) {
@@ -131,22 +132,25 @@ int main(int argn, char *args[])
 				return -5;
 			}
 
-			size_t svgFilenameBufLen = strlen(svgFilename) + 1;
+			// 2018/05/24 Simplify buffer allocation to extend 10 bytes
+			size_t svgFilenameBufLen = strlen(svgFilename) + 10;
 			char *svgFilenameBuffer = (char*)malloc(svgFilenameBufLen);
 			assert(svgFilenameBuffer != NULL);
 
 			int pageInd;
 			for(pageInd = 0; pageInd < pageCount; pageInd++) {
-				while (1) {
-					size_t _wr_len = snprintf(svgFilenameBuffer, svgFilenameBufLen, svgFilename, pageInd + 1);
-					if (_wr_len >= svgFilenameBufLen) {
-						svgFilenameBufLen = _wr_len + 1;
-						svgFilenameBuffer = (char*)realloc(svgFilenameBuffer, svgFilenameBufLen);
-						assert(svgFilenameBuffer != NULL);
-						continue;
-					}
-					break;
-				}
+				// 2018/05/24 Generate formatted filename and comment realloc function
+				sprintf(svgFilenameBuffer, "%s_%d.svg", svgFilename, pageInd + 1);
+				// while (1) {
+				// 	size_t _wr_len = snprintf(svgFilenameBuffer, svgFilenameBufLen, svgFilename, pageInd + 1);
+				// 	if (_wr_len >= svgFilenameBufLen) {
+				// 		svgFilenameBufLen = _wr_len + 1;
+				// 		svgFilenameBuffer = (char*)realloc(svgFilenameBuffer, svgFilenameBufLen);
+				// 		assert(svgFilenameBuffer != NULL);
+				// 		continue;
+				// 	}
+				// 	break;
+				// }
 
 				page = poppler_document_get_page(pdffile, pageInd);
 				curError = convertPage(page, svgFilenameBuffer);
