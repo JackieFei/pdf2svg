@@ -62,9 +62,16 @@ int convertPage(PopplerPage *page, const char* svgFilename)
 	}
 	poppler_page_get_size (page, &width, &height);
 
+	// 2018/06/01 Adjust to 150 DPI
+	double dpi_ratio = 150.0 / 96;
+
 	// Open the SVG file
-	surface = cairo_svg_surface_create(svgFilename, width, height);
+	// 2018/06/01 Adjust to 150 DPI
+	surface = cairo_svg_surface_create(svgFilename, width * dpi_ratio, height * dpi_ratio);
 	drawcontext = cairo_create(surface);
+
+	// 2018/06/01 Adjust to 150 DPI
+	cairo_scale(drawcontext, dpi_ratio, dpi_ratio);
 
 	// Render the PDF file into the SVG file
 	poppler_page_render_for_printing(page, drawcontext);
